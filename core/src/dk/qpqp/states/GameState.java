@@ -4,8 +4,6 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector3;
 import dk.qpqp.Game;
 import dk.qpqp.entities.Background;
 import dk.qpqp.entities.Platform;
@@ -66,7 +64,11 @@ public class GameState implements State {
         for(Player player: players){
             totalX+=player.getX();
         }
-        int averageX = totalX / players.size();
+        int averageX = 100;
+        if (players.size() != 0) {
+            averageX = totalX / players.size();
+            System.out.println("No consoles connected, connect a console and restart the game.");
+        }
         gameCam.position.set(averageX, 0, 0);
     }
 }
