@@ -22,8 +22,9 @@ public class Player extends Entity {
     private final int groundLvl = 145;
     private ControllerListener controllerListener;
     private float speed = 7;
-    private boolean faceingRight;
+    private boolean facingRight;
     private Controller controller;
+    private boolean jumpKeyRelased = true;
 
     private enum AnimationType{
         IDLE, WALKING
@@ -37,12 +38,12 @@ public class Player extends Entity {
         idleAnim.setAnimation("character_idle", 23, 50, 4, 175);
         animations.put(AnimationType.IDLE, idleAnim);
         Animation walkingAnim = new Animation();
-        walkingAnim.setAnimation("character_walking", 37, 80, 4, 200);
+        walkingAnim.setAnimation("character_walking", 23, 50, 4, 200);
         animations.put(AnimationType.WALKING, walkingAnim);
 
         currentAnimation = AnimationType.IDLE;
 
-        faceingRight = true;
+        facingRight = true;
 
         this.controllerListener = controllerListener;
         this.cam = camera;
@@ -57,7 +58,7 @@ public class Player extends Entity {
 
         batch.setProjectionMatrix(cam.combined);
         batch.begin();
-        if(faceingRight)
+        if (facingRight)
             batch.draw(animations.get(currentAnimation).getFrame(), x, y, width, height);
         else
             batch.draw(animations.get(currentAnimation).getFrame(), x+width, y, -width, height);
@@ -87,16 +88,29 @@ public class Player extends Entity {
         ControllerData controllerData = controllerListener.getControllers()
                                         .get(controller);
 
-        if(Math.abs(controllerData.getAxisData()[0].getValue())>0.5){
+        // Move left / right
+        if (Math.abs(controllerData.getAxisData()[controllerData.getType().getStickLeftVertical()].getValue()) > 0.5) {
             setCurrentAnimation(AnimationType.WALKING);
-            animations.get(AnimationType.WALKING).setDelay(400-(int)(Math.abs(controllerData.getAxisData()[0].getValue())*400)+100);
-            System.out.println(animations.get(AnimationType.WALKING).getDelay());
-            faceingRight = controllerData.getAxisData()[0].getValue()>0;
+            animations.get(AnimationType.WALKING).setDelay(400 - (int) (Math.abs(controllerData.getAxisData()[0].getValue()) * 400) + 100);
+            facingRight = controllerData.getAxisData()[0].getValue() > 0;
             setDx(speed*controllerData.getAxisData()[0].getValue()*dt*1000);
         } else {
             setCurrentAnimation(AnimationType.IDLE);
             setDx(0);
         }
+
+        // Jump
+        if (controller.getButton(controllerData.getType().getBtnA()) && onGround && jumpKeyRelased) {
+            onGround = false;
+            setDy(200);
+            jumpKeyRelased = false;
+        }
+
+        if (!jumpKeyRelased && !controller.getButton(controllerData.getType().getBtnA())) {
+            jumpKeyRelased = true;
+        }
+
+        System.out.println(jumpKeyRelased);
 
         super.update(dt);
     }

@@ -27,7 +27,7 @@ public class ControllerListener implements com.badlogic.gdx.controllers.Controll
 
     private void init(){
         for(Controller controller: Controllers.getControllers()){
-            controllers.put(controller, new ControllerData(4, 17, controller));
+            controllers.put(controller, new ControllerData(10, 50, controller));
             controllerList.add(controller);
         }
     }
@@ -35,7 +35,7 @@ public class ControllerListener implements com.badlogic.gdx.controllers.Controll
     @Override
     public void connected(Controller controller) {
         System.out.println(controller.getName()+" connected!");
-        controllers.put(controller, new ControllerData(4, 17, controller));
+        controllers.put(controller, new ControllerData(10, 50, controller));
         controllerList.add(controller);
     }
 
@@ -70,21 +70,25 @@ public class ControllerListener implements com.badlogic.gdx.controllers.Controll
 
     @Override
     public boolean povMoved(Controller controller, int povCode, PovDirection value) {
+        System.out.println("POV");
         return false;
     }
 
     @Override
     public boolean xSliderMoved(Controller controller, int sliderCode, boolean value) {
+        System.out.println("SLIDER X");
         return false;
     }
 
     @Override
     public boolean ySliderMoved(Controller controller, int sliderCode, boolean value) {
+        System.out.println("SLIDER Y");
         return false;
     }
 
     @Override
     public boolean accelerometerMoved(Controller controller, int accelerometerCode, Vector3 value) {
+        System.out.println("Accelerometer");
         return false;
     }
 
