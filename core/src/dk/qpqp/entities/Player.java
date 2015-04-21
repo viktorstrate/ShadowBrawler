@@ -25,9 +25,10 @@ public class Player extends Entity {
     private boolean facingRight;
     private Controller controller;
     private boolean jumpKeyRelased = true;
+    private AnimationType lastFrameAnimation;
 
     private enum AnimationType{
-        IDLE, WALKING
+        IDLE, WALKING, JUMP
     }
 
     public Player(int x, int y, int width, int height, OrthographicCamera camera, MyControllerListener controllerListener, Controller controller) {
@@ -37,11 +38,18 @@ public class Player extends Entity {
         Animation idleAnim = new Animation();
         idleAnim.setAnimation("character_idle", 23, 50, 4, 175);
         animations.put(AnimationType.IDLE, idleAnim);
+
         Animation walkingAnim = new Animation();
         walkingAnim.setAnimation("character_walking", 23, 50, 4, 200);
         animations.put(AnimationType.WALKING, walkingAnim);
 
+        Animation jumpAnim = new Animation();
+        jumpAnim.setAnimation("character_jump", 19, 50, 7, 75);
+        jumpAnim.setStopPoint(3);
+        animations.put(AnimationType.JUMP, jumpAnim);
+
         currentAnimation = AnimationType.IDLE;
+        lastFrameAnimation = currentAnimation;
 
         facingRight = true;
 
@@ -89,16 +97,19 @@ public class Player extends Entity {
         ControllerData controllerData = controllerListener.getControllers()
                                         .get(controller);
 
+        float moveAmount = 0;
+
         if (controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue() > 0.1) {
             setDx(speed * controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue() * dt * 1000);
             facingRight = true;
+            moveAmount = Math.abs(controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue());
         }
 
         if (controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdNegative()].getValue() < -0.1) {
             setDx(speed * controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdNegative()].getValue() * dt * 1000);
             facingRight = false;
+            moveAmount = Math.abs(controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue());
         }
-
 
         // Jump
         if (controller.getButton(controllerData.getType().getBtnA().getEventId()) && onGround && jumpKeyRelased) {
@@ -110,6 +121,19 @@ public class Player extends Entity {
         if (!jumpKeyRelased && !controller.getButton(controllerData.getType().getBtnA().getEventId())) {
             jumpKeyRelased = true;
         }
+
+        // Set animation
+        if (!onGround) { // jumping
+            setCurrentAnimation(AnimationType.JUMP);
+            if (lastFrameAnimation != AnimationType.JUMP) animations.get(AnimationType.JUMP).setCurrentFrame(0);
+        } else if (moveAmount > 0.1f) { //if moving
+            setCurrentAnimation(AnimationType.WALKING);
+            animations.get(AnimationType.WALKING).setDelay(400 - (int) (moveAmount * 400) + 100);
+        } else { // idle
+            setCurrentAnimation(AnimationType.IDLE);
+        }
+
+        lastFrameAnimation = currentAnimation;
 
         super.update(dt);
     }

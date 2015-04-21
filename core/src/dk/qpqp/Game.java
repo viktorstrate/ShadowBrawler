@@ -39,6 +39,7 @@ public class Game extends ApplicationAdapter {
 		//Player
 		Content.loadTexture("character/idle.png", "character_idle");
 		Content.loadTexture("character/walking.png", "character_walking");
+		Content.loadTexture("character/jump.png", "character_jump");
 		// Misc
 		Content.loadTexture("platform.png", "platform");
 		Content.loadTexture("debug.png", "debug");

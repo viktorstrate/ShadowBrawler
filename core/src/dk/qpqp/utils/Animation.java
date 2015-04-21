@@ -13,7 +13,11 @@ public class Animation {
     private float delay;
     private float time;
 
-    public Animation(){}
+    private int stopFrame;
+
+    public Animation() {
+        stopFrame = -1;
+    }
 
     public void setAnimation(TextureRegion[] frames, float delay){
         this.frames = frames;
@@ -33,6 +37,10 @@ public class Animation {
 
     public void update(float dt){
         if(delay<=0) return;
+        if (stopFrame == currentFrame) {
+            return;
+        }
+
         if(delay/1000<time){
             time -= delay/1000;
             if(currentFrame==frames.length-1){
@@ -41,6 +49,10 @@ public class Animation {
         } else {
             time += dt;
         }
+    }
+
+    public void setStopPoint(int frame) {
+        stopFrame = frame;
     }
 
     public TextureRegion getFrame(){

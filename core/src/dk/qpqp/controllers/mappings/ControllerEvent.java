@@ -56,7 +56,6 @@ public class ControllerEvent {
         this.direction = direction;
     }
 
-
     public PovDirection getDirection() {
         return direction;
     }
