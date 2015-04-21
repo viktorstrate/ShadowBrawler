@@ -21,6 +21,7 @@ public class ControllerData {
         for (ControllerList cList : ControllerList.values()) {
             if (cList.getController().getId().equals(controller.getName())) {
                 type = cList.getController();
+                System.out.printf("Using controller mapping %s, for controller\n", cList.toString());
                 break;
             }
         }

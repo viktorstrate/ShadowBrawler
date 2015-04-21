@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import dk.qpqp.states.GameState;
 import dk.qpqp.states.GameStateManager;
 import dk.qpqp.utils.Content;
-import dk.qpqp.utils.ControllerListener;
+import dk.qpqp.utils.MyControllerListener;
 
 /**
  * The Game class is the main class.
@@ -23,7 +23,7 @@ public class Game extends ApplicationAdapter {
 
 	private SpriteBatch batch;
 	private GameStateManager gsm;
-	private ControllerListener controllerListener;
+	private MyControllerListener controllerListener;
 
 	protected static Content res;
 
@@ -43,7 +43,7 @@ public class Game extends ApplicationAdapter {
 		Content.loadTexture("platform.png", "platform");
 		Content.loadTexture("debug.png", "debug");
 
-		controllerListener = new ControllerListener();
+		controllerListener = new MyControllerListener();
 		Controllers.addListener(controllerListener);
 
 		// Game State Manager
@@ -70,7 +70,7 @@ public class Game extends ApplicationAdapter {
 		gsm.getCurrentState().update(Gdx.graphics.getDeltaTime());
 	}
 
-	public ControllerListener getControllerListener() {
+	public MyControllerListener getControllerListener() {
 		return controllerListener;
 	}
 }

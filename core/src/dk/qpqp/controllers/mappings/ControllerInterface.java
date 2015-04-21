@@ -5,47 +5,47 @@ package dk.qpqp.controllers.mappings;
  */
 public abstract interface ControllerInterface {
 
-    public int getBtnA();
+    public ControllerEvent getBtnA();
 
-    public int getBtnB();
+    public ControllerEvent getBtnB();
 
-    public int getBtnX();
+    public ControllerEvent getBtnX();
 
-    public int getBtnY();
+    public ControllerEvent getBtnY();
 
-    public int getArrowUp();
+    public ControllerEvent getArrowUp();
 
-    public int getArrowLeft();
+    public ControllerEvent getArrowLeft();
 
-    public int getArrowDown();
+    public ControllerEvent getArrowDown();
 
-    public int getArrowRight();
+    public ControllerEvent getArrowRight();
 
-    public int getBtnRB();
+    public ControllerEvent getBtnRB();
 
-    public int getBtnRT();
+    public ControllerEvent getBtnRT();
 
-    public int getBtnLB();
+    public ControllerEvent getBtnLB();
 
-    public int getBtnLT();
+    public ControllerEvent getBtnLT();
 
-    public int getBtnHome();
+    public ControllerEvent getBtnHome();
 
-    public int getBtnStart();
+    public ControllerEvent getBtnStart();
 
-    public int getBtnBack();
+    public ControllerEvent getBtnBack();
 
-    public int getStickRightVertical();
+    public ControllerEvent getStickRightVertical();
 
-    public int getStickRightHorizontal();
+    public ControllerEvent getStickRightHorizontal();
 
-    public int getStickLeftVertical();
+    public ControllerEvent getStickLeftVertical();
 
-    public int getStickLeftHorizontal();
+    public ControllerEvent getStickLeftHorizontal();
 
-    public int getBtnStickLeft();
+    public ControllerEvent getBtnStickLeft();
 
-    public int getBtnStickRight();
+    public ControllerEvent getBtnStickRight();
 
     public String getId();
 }

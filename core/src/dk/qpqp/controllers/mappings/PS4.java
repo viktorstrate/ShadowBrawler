@@ -5,109 +5,110 @@ package dk.qpqp.controllers.mappings;
  */
 public class PS4 implements ControllerInterface {
     @Override
-    public int getBtnA() {
-        return 1;
+    public ControllerEvent getBtnA() {
+        return new ControllerEvent().setButton(1);
     }
 
     @Override
-    public int getBtnB() {
-        return 2;
+    public ControllerEvent getBtnB() {
+        return new ControllerEvent().setButton(2);
     }
 
     @Override
-    public int getBtnX() {
-        return 0;
+    public ControllerEvent getBtnX() {
+        return new ControllerEvent().setButton(0);
     }
 
     @Override
-    public int getBtnY() {
-        return 3;
+    public ControllerEvent getBtnY() {
+        return new ControllerEvent().setButton(3);
     }
 
     @Override
-    public int getArrowUp() {
-        return -1;
+    public ControllerEvent getArrowUp() {
+        return null;
     }
 
     @Override
-    public int getArrowLeft() {
-        return -1;
+    public ControllerEvent getArrowLeft() {
+        return null;
     }
 
     @Override
-    public int getArrowDown() {
-        return -1;
+    public ControllerEvent getArrowDown() {
+        return null;
     }
 
     @Override
-    public int getArrowRight() {
-        return -1;
+    public ControllerEvent getArrowRight() {
+        return null;
     }
 
     @Override
-    public int getBtnRB() {
-        return 5;
+    public ControllerEvent getBtnRB() {
+        return new ControllerEvent().setButton(5);
     }
 
     @Override
-    public int getBtnRT() {
-        return 7;
+    public ControllerEvent getBtnRT() {
+        return new ControllerEvent().setButton(7);
     }
 
     @Override
-    public int getBtnLB() {
-        return 4;
+    public ControllerEvent getBtnLB() {
+        return new ControllerEvent().setButton(4);
     }
 
     @Override
-    public int getBtnLT() {
-        return 6;
+    public ControllerEvent getBtnLT() {
+        return new ControllerEvent().setButton(5);
     }
 
     @Override
-    public int getBtnHome() {
-        return 12;
+    public ControllerEvent getBtnHome() {
+        return new ControllerEvent().setButton(12);
     }
 
     @Override
-    public int getBtnStart() {
-        return 9;
+    public ControllerEvent getBtnStart() {
+        return new ControllerEvent().setButton(9);
     }
 
     @Override
-    public int getBtnBack() {
-        return 8;
+    public ControllerEvent getBtnBack() {
+        return new ControllerEvent().setButton(8);
     }
 
     @Override
-    public int getStickRightVertical() {
-        return 2;
+    public ControllerEvent getStickRightVertical() {
+        return new ControllerEvent().setAxis(2, 2);
     }
 
     @Override
-    public int getStickRightHorizontal() {
-        return 3;
+    public ControllerEvent getStickRightHorizontal() {
+        return new ControllerEvent().setAxis(3, 3);
     }
 
     @Override
-    public int getStickLeftVertical() {
-        return 0;
+    public ControllerEvent getStickLeftVertical() {
+        return new ControllerEvent().setAxis(0, 0);
     }
 
     @Override
-    public int getStickLeftHorizontal() {
-        return 1;
+    public ControllerEvent getStickLeftHorizontal() {
+        return new ControllerEvent().setAxis(1, 1);
     }
 
     @Override
-    public int getBtnStickLeft() {
-        return 10;
+    public ControllerEvent getBtnStickLeft() {
+        return new ControllerEvent().setButton(10);
     }
 
     @Override
-    public int getBtnStickRight() {
-        return 11;
+    public ControllerEvent getBtnStickRight() {
+        return new ControllerEvent().setButton(11);
     }
+
 
     @Override
     public String getId() {

@@ -8,7 +8,7 @@ import dk.qpqp.Game;
 import dk.qpqp.entities.Background;
 import dk.qpqp.entities.Platform;
 import dk.qpqp.entities.Player;
-import dk.qpqp.utils.ControllerListener;
+import dk.qpqp.utils.MyControllerListener;
 
 import java.util.ArrayList;
 
@@ -23,9 +23,9 @@ public class GameState implements State {
     private Background background;
     private Platform platform;
     private ArrayList<Player> players;
-    private ControllerListener controllerListener;
+    private MyControllerListener controllerListener;
 
-    public GameState(ControllerListener controllerListener) {
+    public GameState(MyControllerListener controllerListener) {
         gameCam = new OrthographicCamera();
         gameCam.setToOrtho(false, Game.WIDTH/ CAM_ZOOM, Game.HEIGHT/ CAM_ZOOM);
         gameCam.position.set(gameCam.position.x + Game.WIDTH / 2 - (Game.WIDTH/ CAM_ZOOM)/2, gameCam.position.y +  Game.HEIGHT/2 - (Game.HEIGHT/ CAM_ZOOM)/2, 0);
@@ -41,6 +41,9 @@ public class GameState implements State {
         for(Controller controller: Controllers.getControllers()){
             players.add(new Player(200, 200, 23, 50, gameCam, controllerListener, controller));
         }
+
+        if (players.size() == 0)
+            System.out.println("No consoles connected, connect a console and restart the game.");
 
 
     }
@@ -67,7 +70,6 @@ public class GameState implements State {
         int averageX = 100;
         if (players.size() != 0) {
             averageX = totalX / players.size();
-            System.out.println("No consoles connected, connect a console and restart the game.");
         }
         gameCam.position.set(averageX, 0, 0);
     }

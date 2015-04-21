@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import dk.qpqp.utils.Animation;
 import dk.qpqp.utils.ControllerData;
-import dk.qpqp.utils.ControllerListener;
+import dk.qpqp.utils.MyControllerListener;
 
 import java.util.HashMap;
 
@@ -20,7 +20,7 @@ public class Player extends Entity {
     private float gravity = 400;
     private boolean onGround = false;
     private final int groundLvl = 145;
-    private ControllerListener controllerListener;
+    private MyControllerListener controllerListener;
     private float speed = 7;
     private boolean facingRight;
     private Controller controller;
@@ -30,7 +30,7 @@ public class Player extends Entity {
         IDLE, WALKING
     }
 
-    public Player(int x, int y, int width, int height, OrthographicCamera camera, ControllerListener controllerListener, Controller controller) {
+    public Player(int x, int y, int width, int height, OrthographicCamera camera, MyControllerListener controllerListener, Controller controller) {
         super(x, y, width, height);
 
         animations = new HashMap<AnimationType, Animation>();
@@ -72,8 +72,9 @@ public class Player extends Entity {
 
         if(!onGround) {
             setDy(getDy() - gravity * dt);
-
         }
+
+        setDx(0);
 
         if(getY()>groundLvl){
             onGround = false;
@@ -88,29 +89,27 @@ public class Player extends Entity {
         ControllerData controllerData = controllerListener.getControllers()
                                         .get(controller);
 
-        // Move left / right
-        if (Math.abs(controllerData.getAxisData()[controllerData.getType().getStickLeftVertical()].getValue()) > 0.5) {
-            setCurrentAnimation(AnimationType.WALKING);
-            animations.get(AnimationType.WALKING).setDelay(400 - (int) (Math.abs(controllerData.getAxisData()[0].getValue()) * 400) + 100);
-            facingRight = controllerData.getAxisData()[0].getValue() > 0;
-            setDx(speed*controllerData.getAxisData()[0].getValue()*dt*1000);
-        } else {
-            setCurrentAnimation(AnimationType.IDLE);
-            setDx(0);
+        if (controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue() > 0.1) {
+            setDx(speed * controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue() * dt * 1000);
+            facingRight = true;
         }
 
+        if (controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdNegative()].getValue() < -0.1) {
+            setDx(speed * controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdNegative()].getValue() * dt * 1000);
+            facingRight = false;
+        }
+
+
         // Jump
-        if (controller.getButton(controllerData.getType().getBtnA()) && onGround && jumpKeyRelased) {
+        if (controller.getButton(controllerData.getType().getBtnA().getEventId()) && onGround && jumpKeyRelased) {
             onGround = false;
             setDy(200);
             jumpKeyRelased = false;
         }
 
-        if (!jumpKeyRelased && !controller.getButton(controllerData.getType().getBtnA())) {
+        if (!jumpKeyRelased && !controller.getButton(controllerData.getType().getBtnA().getEventId())) {
             jumpKeyRelased = true;
         }
-
-        System.out.println(jumpKeyRelased);
 
         super.update(dt);
     }
