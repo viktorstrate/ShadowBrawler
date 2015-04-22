@@ -1,5 +1,6 @@
 package dk.qpqp.utils;
 
+import com.badlogic.gdx.InputProcessor;
 import dk.qpqp.Game;
 
 /**
