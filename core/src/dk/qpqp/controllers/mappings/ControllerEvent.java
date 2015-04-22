@@ -30,6 +30,10 @@ public class ControllerEvent {
     public ControllerEvent setAxis(int positiveEventId, int negativeEventId) {
         this.eventIdPositive = positiveEventId;
         this.eventIdNegative = negativeEventId;
+
+        if (eventIdNegative == -1) this.eventId = positiveEventId;
+        if (eventIdPositive == -1) this.eventId = negativeEventId;
+
         this.type = ControllerEventType.AXIS;
         return this;
     }

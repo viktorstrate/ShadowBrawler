@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import dk.qpqp.states.GameState;
 import dk.qpqp.states.GameStateManager;
 import dk.qpqp.utils.Content;
+import dk.qpqp.utils.KeyboardListener;
 import dk.qpqp.utils.MyControllerListener;
 
 /**
@@ -24,6 +25,7 @@ public class Game extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private GameStateManager gsm;
 	private MyControllerListener controllerListener;
+	private KeyboardListener keyboardListener;
 
 	protected static Content res;
 
@@ -40,12 +42,18 @@ public class Game extends ApplicationAdapter {
 		Content.loadTexture("character/idle.png", "character_idle");
 		Content.loadTexture("character/walking.png", "character_walking");
 		Content.loadTexture("character/jump.png", "character_jump");
+		Content.loadTexture("character/punch.png", "character_punch");
+		Content.loadTexture("character/block.png", "character_block");
 		// Misc
 		Content.loadTexture("platform.png", "platform");
 		Content.loadTexture("debug.png", "debug");
 
 		controllerListener = new MyControllerListener();
 		Controllers.addListener(controllerListener);
+		keyboardListener = new KeyboardListener(this);
+		Gdx.input.setInputProcessor(keyboardListener);
+
+
 
 		// Game State Manager
 		gsm = new GameStateManager(GameStateManager.States.Game);

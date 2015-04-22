@@ -1,13 +1,6 @@
 package dk.qpqp.entities;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-
-import java.util.ArrayList;
 
 /**
  * Created by Viktor on 19/04/2015.
@@ -19,12 +12,17 @@ public abstract class Entity extends GameObject {
     protected int cHeight;
     protected int cxOffset, cyOffset;
 
+    protected int initWidth, initHeight;
+
     public Entity(int x, int y, int width, int height) {
         super(x, y, width, height);
         this.cWidth = width;
         this.cHeight = height;
         this.cxOffset = 0;
         this.cyOffset = 0;
+
+        this.initWidth = width;
+        this.initHeight = height;
 
     }
 
@@ -69,5 +67,13 @@ public abstract class Entity extends GameObject {
 
     public void setCyOffset(int cY) {
         this.cyOffset = cY;
+    }
+
+    public int getInitWidth() {
+        return initWidth;
+    }
+
+    public int getInitHeight() {
+        return initHeight;
     }
 }

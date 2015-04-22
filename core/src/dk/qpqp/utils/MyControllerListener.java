@@ -30,7 +30,7 @@ public class MyControllerListener implements ControllerListener {
         for(Controller controller: Controllers.getControllers()){
             controllers.put(controller, new ControllerData(10, 50, controller));
             controllerList.add(controller);
-            System.out.printf("\"%s\", connected", controller.getName());
+            System.out.printf("\"%s\", connected\n", controller.getName());
         }
     }
 

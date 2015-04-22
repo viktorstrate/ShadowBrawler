@@ -3,10 +3,13 @@ package dk.qpqp.entities;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import dk.qpqp.controllers.mappings.ControllerInput;
 import dk.qpqp.utils.Animation;
 import dk.qpqp.utils.ControllerData;
 import dk.qpqp.utils.MyControllerListener;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 
 /**
@@ -27,8 +30,11 @@ public class Player extends Entity {
     private boolean jumpKeyRelased = true;
     private AnimationType lastFrameAnimation;
 
+    private boolean punching = false;
+    private boolean blocking = false;
+
     private enum AnimationType{
-        IDLE, WALKING, JUMP
+        IDLE, WALKING, JUMP, PUNCH, BLOCK
     }
 
     public Player(int x, int y, int width, int height, OrthographicCamera camera, MyControllerListener controllerListener, Controller controller) {
@@ -47,6 +53,22 @@ public class Player extends Entity {
         jumpAnim.setAnimation("character_jump", 19, 50, 7, 75);
         jumpAnim.setStopPoint(3);
         animations.put(AnimationType.JUMP, jumpAnim);
+
+        Animation punchAnim = new Animation();
+        punchAnim.setAnimation("character_punch", 35, 50, 3, 100);
+        punchAnim.addFrameEvent(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                punching = false;
+            }
+        }, 2);
+        animations.put(AnimationType.PUNCH, punchAnim);
+
+        Animation blockAnim = new Animation();
+        blockAnim.setAnimation("character_block", 25, 50, 2, 50);
+        blockAnim.setCurrentFrame(1);
+        blockAnim.setStopPoint(1);
+        animations.put(AnimationType.BLOCK, blockAnim);
 
         currentAnimation = AnimationType.IDLE;
         lastFrameAnimation = currentAnimation;
@@ -69,7 +91,7 @@ public class Player extends Entity {
         if (facingRight)
             batch.draw(animations.get(currentAnimation).getFrame(), x, y, width, height);
         else
-            batch.draw(animations.get(currentAnimation).getFrame(), x+width, y, -width, height);
+            batch.draw(animations.get(currentAnimation).getFrame(), x + getInitWidth(), y, -width, height);
         batch.end();
 
     }
@@ -77,6 +99,8 @@ public class Player extends Entity {
     @Override
     public void update(float dt) {
         animations.get(currentAnimation).update(dt);
+
+        blocking = false;
 
         if(!onGround) {
             setDy(getDy() - gravity * dt);
@@ -97,19 +121,11 @@ public class Player extends Entity {
         ControllerData controllerData = controllerListener.getControllers()
                                         .get(controller);
 
-        float moveAmount = 0;
-
-        if (controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue() > 0.1) {
-            setDx(speed * controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue() * dt * 1000);
-            facingRight = true;
-            moveAmount = Math.abs(controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue());
+        // Blocking
+        if (controllerData.getValueAsAxis(ControllerInput.RT) < -0.3f && onGround) {
+            blocking = true;
         }
 
-        if (controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdNegative()].getValue() < -0.1) {
-            setDx(speed * controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdNegative()].getValue() * dt * 1000);
-            facingRight = false;
-            moveAmount = Math.abs(controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue());
-        }
 
         // Jump
         if (controller.getButton(controllerData.getType().getBtnA().getEventId()) && onGround && jumpKeyRelased) {
@@ -122,16 +138,46 @@ public class Player extends Entity {
             jumpKeyRelased = true;
         }
 
+        // Punching
+        if (controllerData.getValueAsButton(ControllerInput.X) && onGround) {
+            punching = true;
+        }
+        if (!onGround) {
+            punching = false;
+        }
+
+        // Moving
+        float moveAmount = 0;
+
+        if (controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue() > 0.1 && !blocking && !punching) {
+            setDx(speed * controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue() * dt * 1000);
+            facingRight = true;
+            moveAmount = Math.abs(controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue());
+        }
+
+        if (controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdNegative()].getValue() < -0.1 && !blocking && !punching) {
+            setDx(speed * controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdNegative()].getValue() * dt * 1000);
+            facingRight = false;
+            moveAmount = Math.abs(controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue());
+        }
+
         // Set animation
         if (!onGround) { // jumping
             setCurrentAnimation(AnimationType.JUMP);
             if (lastFrameAnimation != AnimationType.JUMP) animations.get(AnimationType.JUMP).setCurrentFrame(0);
+        } else if (punching) { // Basic punch
+            setCurrentAnimation(AnimationType.PUNCH);
+        } else if (blocking) {
+            setCurrentAnimation(AnimationType.BLOCK);
         } else if (moveAmount > 0.1f) { //if moving
             setCurrentAnimation(AnimationType.WALKING);
             animations.get(AnimationType.WALKING).setDelay(400 - (int) (moveAmount * 400) + 100);
         } else { // idle
             setCurrentAnimation(AnimationType.IDLE);
         }
+
+        setWidth(animations.get(currentAnimation).getWidth());
+        setHeight(animations.get(currentAnimation).getHeight());
 
         lastFrameAnimation = currentAnimation;
 
@@ -140,5 +186,8 @@ public class Player extends Entity {
 
     public void setCurrentAnimation(AnimationType animation){
         currentAnimation = animation;
+        if (lastFrameAnimation != AnimationType.PUNCH) {
+            animations.get(AnimationType.PUNCH).setCurrentFrame(0);
+        }
     }
 }
