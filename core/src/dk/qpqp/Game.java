@@ -27,6 +27,8 @@ public class Game extends ApplicationAdapter {
 	private MyControllerListener controllerListener;
 	private KeyboardListener keyboardListener;
 
+	private static float time;
+
 	protected static Content res;
 
 	@Override
@@ -44,6 +46,10 @@ public class Game extends ApplicationAdapter {
 		Content.loadTexture("character/jump.png", "character_jump");
 		Content.loadTexture("character/punch.png", "character_punch");
 		Content.loadTexture("character/block.png", "character_block");
+		Content.loadTexture("character/stun.png", "character_stun");
+
+		Content.loadTexture("character/health/healthBG.png", "character_health_bg");
+		Content.loadTexture("character/health/healthFG.png", "character_health_fg");
 		// Misc
 		Content.loadTexture("platform.png", "platform");
 		Content.loadTexture("debug.png", "debug");
@@ -59,13 +65,14 @@ public class Game extends ApplicationAdapter {
 		gsm = new GameStateManager(GameStateManager.States.Game);
 		gsm.loadState(new GameState(controllerListener), GameStateManager.States.Game);
 
+		time = 0;
+
 	}
 
 	@Override
 	public void render () {
 
 		update();
-
 
 		Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -76,10 +83,15 @@ public class Game extends ApplicationAdapter {
 	}
 
 	public void update(){
+		time += Gdx.graphics.getDeltaTime();
 		gsm.getCurrentState().update(Gdx.graphics.getDeltaTime());
 	}
 
 	public MyControllerListener getControllerListener() {
 		return controllerListener;
+	}
+
+	public static float getTime() {
+		return time;
 	}
 }
