@@ -68,10 +68,12 @@ public class GameState implements State {
                     if (player.isFacingRight()) {
                         if (opponent.getX() - 10 > player.getX() && opponent.getX() - 30 < player.getX()) {
                             opponent.hit(Player.PlayerHit.PUNCH, false);
+                            player.setPunchHit(false);
                         }
                     } else {
                         if (opponent.getX() + 10 < player.getX() && opponent.getX() + 30 > player.getX()) {
                             opponent.hit(Player.PlayerHit.PUNCH, true);
+                            player.setPunchHit(false);
                         }
                     }
                 }

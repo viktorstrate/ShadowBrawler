@@ -67,6 +67,7 @@ public class MyControllerListener implements ControllerListener {
             //System.out.println(controller.getName() + " moved axis: " + axisCode + " new value: " + value);
         }
         controllers.get(controller).getAxisData()[axisCode].setValue(value);
+        System.out.println("Axis Value: " + value + ", Axis Code: " + axisCode);
         return false;
     }
 

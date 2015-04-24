@@ -15,6 +15,10 @@ public class ControllerData {
     private Controller controller;
     private ControllerInterface type = null;
 
+    public enum AxisDirection {
+        POSITIVE, NEGATIVE, NONE, BOTH
+    }
+
     public ControllerData(int axises, int buttons, Controller controller){
         this.axisData = new AxisData[axises];
         this.buttonData = new ButtonData[buttons];
@@ -71,7 +75,7 @@ public class ControllerData {
     public boolean getValueAsButton(ControllerEvent event) {
         switch (event.getType()) {
             case BUTTON:
-                return controller.getButton(event.getEventId());
+                return buttonData[event.getEventId()].isPressed();
             case AXIS:
                 System.out.println("VALUE: " + controller.getAxis(event.getEventId()));
                 if (Math.abs(controller.getAxis(event.getEventIdPositive())) > 0.2f)
@@ -79,8 +83,6 @@ public class ControllerData {
 
                 if (Math.abs(controller.getAxis(event.getEventIdNegative())) > 0.2f)
                     return true;
-
-                return controller.getAxis(event.getEventId()) > 0.2f;
             case POV:
                 return controller.getPov(event.getEventId()) == event.getDirection();
         }
@@ -91,24 +93,55 @@ public class ControllerData {
         return getValueAsButton(getInputType(input));
     }
 
-    public float getValueAsAxis(ControllerEvent event) {
+    public float getValueAsAxis(ControllerEvent event, AxisDirection direction) {
         switch (event.getType()) {
             case BUTTON:
                 if (controller.getButton(event.getEventId())) {
                     return 1f;
                 } else return 0f;
             case AXIS:
-                return controller.getAxis(event.getEventId());
+                if (direction == AxisDirection.NEGATIVE) {
+                    if (event.getEventIdNegative() == -1) return 0;
+                    return axisData[event.getEventIdNegative()].getValue();
+                }
+                if (direction == AxisDirection.POSITIVE) {
+                    if (event.getEventIdPositive() == -1) {
+                        System.out.println("Is -1");
+                        return 0;
+                    }
+                    return axisData[event.getEventIdPositive()].getValue();
+                }
+                if (direction == AxisDirection.NONE) {
+                    if (event.getEventId() == -1) {
+                        return 0;
+                    }
+                    return axisData[event.getEventId()].getValue();
+                }
+                if (direction == AxisDirection.BOTH) {
+                    if (event.getEventIdPositive() == -1) {
+                        return 0;
+                    }
+                    if (event.getEventIdNegative() == -1) {
+                        return 0;
+                    }
+                    return axisData[event.getEventIdPositive()].getValue() + axisData[event.getEventIdNegative()].getValue();
+                }
             case POV:
                 if (controller.getPov(event.getEventId()) == event.getDirection()) {
                     return 1f;
                 } else return 0f;
+            default:
+                System.out.println("Didn't find a value in ControllerData, getValueAsAxis");
+                return 0;
         }
-        return 0f;
     }
 
     public float getValueAsAxis(ControllerInput input) {
-        return getValueAsAxis(getInputType(input));
+        return getValueAsAxis(getInputType(input), AxisDirection.POSITIVE);
+    }
+
+    public float getValueAsAxis(ControllerInput input, AxisDirection direction) {
+        return getValueAsAxis(getInputType(input), direction);
     }
 
     public ControllerEvent getInputType(ControllerInput input) {

@@ -13,6 +13,7 @@ public class Animation {
 
     private TextureRegion[] frames;
     private int currentFrame;
+    private int lastFrame;
 
     private float delay;
     private float time;
@@ -31,6 +32,7 @@ public class Animation {
         this.frames = frames;
         this.delay = delay;
         currentFrame = 0;
+        lastFrame = currentFrame;
         time = 0;
     }
 
@@ -61,10 +63,6 @@ public class Animation {
             return;
         }
 
-        for (AnimationEvent event : frameEvents) {
-            if (currentFrame == event.getFrame())
-                event.getListener().actionPerformed(new ActionEvent(this, 0, ""));
-        }
 
         if(delay/1000<time){
             time -= delay/1000;
@@ -74,6 +72,15 @@ public class Animation {
         } else {
             time += dt;
         }
+
+        if (lastFrame != currentFrame) {
+            for (AnimationEvent event : frameEvents) {
+                if (currentFrame == event.getFrame())
+                    event.getListener().actionPerformed(new ActionEvent(this, 0, ""));
+            }
+        }
+
+        lastFrame = currentFrame;
     }
 
     public void setStopPoint(int frame) {

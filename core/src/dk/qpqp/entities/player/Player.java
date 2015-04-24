@@ -25,7 +25,7 @@ public class Player extends Entity {
     private boolean onGround = false;
     private final int groundLvl = 145;
     private MyControllerListener controllerListener;
-    private float speed = 7;
+
     private boolean facingRight;
     private Controller controller;
     private boolean jumpKeyRelased = true;
@@ -33,28 +33,29 @@ public class Player extends Entity {
 
     private PlayerHit hittingType;
     /**
+     * True if the punch button was pressed, last frame.
+     */
+    private boolean canHit;
+    /**
      * If true switches to the punch animation
      */
     private boolean hitting;
-    private boolean punchButtonJustPressed;
     /**
      * Is true the frame where the punch should deal damage
      */
     private boolean punchHit;
-    /**
-     * True if the punch button was pressed, last frame.
-     */
-    private boolean punchButtonPressedLastFrame;
 
     private boolean blocking = false;
 
     private PlayerHealth healthBar;
 
     private int health;
-    private double stunTime;
+    private boolean hit;
+
+    private PlayerMove move;
 
     private enum AnimationType{
-        IDLE, WALKING, JUMP, PUNCH, BLOCK, STUN
+        IDLE, WALKING, JUMP, PUNCH, BLOCK, STUN, HIT
     }
 
     /**
@@ -68,7 +69,7 @@ public class Player extends Entity {
         super(x, y, width, height);
 
         this.health = 100;
-        this.stunTime = 0;
+        this.hit = false;
 
         animations = new HashMap<AnimationType, Animation>();
         Animation idleAnim = new Animation();
@@ -91,6 +92,7 @@ public class Player extends Entity {
             public void actionPerformed(ActionEvent e) {
                 hittingType = PlayerHit.PUNCH;
                 hitting = false;
+                canHit = true;
                 punchHit = true;
             }
         }, 2);
@@ -106,6 +108,16 @@ public class Player extends Entity {
         blockAnim.setStopPoint(1);
         animations.put(AnimationType.BLOCK, blockAnim);
 
+        Animation hitAnim = new Animation();
+        hitAnim.setAnimation("character_hit", 31, 50, 4, 100);
+        hitAnim.addFrameEvent(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hit = false;
+            }
+        }, 3);
+        animations.put(AnimationType.HIT, hitAnim);
+
         currentAnimation = AnimationType.IDLE;
         lastFrameAnimation = currentAnimation;
 
@@ -120,6 +132,8 @@ public class Player extends Entity {
         hittingType = PlayerHit.PUNCH;
         hitting = false;
         punchHit = false;
+
+        move = new PlayerMove(this);
     }
 
     @Override
@@ -145,7 +159,6 @@ public class Player extends Entity {
         animations.get(currentAnimation).update(dt);
 
         blocking = false;
-        punchButtonJustPressed = false;
 
         if(!onGround) {
             setDy(getDy() - gravity * dt);
@@ -166,8 +179,9 @@ public class Player extends Entity {
         ControllerData controllerData = controllerListener.getControllers()
                                         .get(controller);
 
+
         // Blocking
-        if (controllerData.getValueAsAxis(ControllerInput.RT) < -0.3f && onGround) {
+        if (controllerData.getValueAsAxis(ControllerInput.RT, ControllerData.AxisDirection.BOTH) < -0.3f && onGround) {
             blocking = true;
         }
 
@@ -184,35 +198,27 @@ public class Player extends Entity {
         }
 
         // Punching
-        if (controllerData.getValueAsButton(ControllerInput.X) && onGround) {
+        if (controllerData.getValueAsButton(ControllerInput.X) ||
+                Math.abs(controllerData.getValueAsAxis(ControllerInput.STICK_RIGHT_HORIZONTAL, ControllerData.AxisDirection.BOTH)) > 0.3f) {
             hittingType = PlayerHit.PUNCH;
-            if (controllerData.getValueAsButton(ControllerInput.X) && !punchButtonPressedLastFrame) {
-                punchButtonJustPressed = true;
-                hitting = true;
+            hitting = true;
+            if (controllerData.getValueAsAxis(ControllerInput.STICK_RIGHT_HORIZONTAL, ControllerData.AxisDirection.POSITIVE) > 0.3f) {
+                facingRight = true;
+            } else if (controllerData.getValueAsAxis(ControllerInput.STICK_RIGHT_HORIZONTAL, ControllerData.AxisDirection.POSITIVE) < -0.3f) {
+                facingRight = false;
             }
+        } else {
+            hitting = false;
         }
+
         if (!onGround) {
             hitting = false;
         }
 
-        // Moving
         float moveAmount = 0;
-
-        if (controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue() > 0.1 && !blocking && !hitting) {
-            setDx(speed * controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue() * dt * 1000);
-            facingRight = true;
-            moveAmount = Math.abs(controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue());
-        }
-
-        if (controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdNegative()].getValue() < -0.1 && !blocking && !hitting) {
-            setDx(speed * controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdNegative()].getValue() * dt * 1000);
-            facingRight = false;
-            moveAmount = Math.abs(controllerData.getAxisData()[controllerData.getType().getStickLeftVertical().getEventIdPositive()].getValue());
-        }
-
-        if (stunTime > 0) {
-            moveAmount = 0;
-            setDx(0);
+        // Moving
+        if (!hit) {
+            moveAmount = move.update(dt, controllerData);
         }
 
         // Set animation
@@ -226,31 +232,20 @@ public class Player extends Entity {
         } else if (moveAmount > 0.1f) { //if moving
             setCurrentAnimation(AnimationType.WALKING);
             animations.get(AnimationType.WALKING).setDelay(400 - (int) (moveAmount * 400) + 100);
-        } else if (stunTime > 0) {
-            setCurrentAnimation(AnimationType.STUN);
+        } else if (hit) {
+            setCurrentAnimation(AnimationType.HIT);
+            if (lastFrameAnimation != AnimationType.HIT)
+                animations.get(AnimationType.HIT).setCurrentFrame(0);
         } else { // idle
             setCurrentAnimation(AnimationType.IDLE);
         }
-
-        if (stunTime <= 0) {
-            stunTime = 0;
-        } else {
-            stunTime -= dt * 1000;
-        }
-
 
         setWidth(animations.get(currentAnimation).getWidth());
         setHeight(animations.get(currentAnimation).getHeight());
 
         lastFrameAnimation = currentAnimation;
 
-
         healthBar.update(dt);
-
-        if (punchButtonJustPressed)
-            System.out.println(punchButtonJustPressed);
-
-        punchButtonPressedLastFrame = controllerData.getValueAsButton(ControllerInput.X);
 
         super.update(dt);
     }
@@ -272,11 +267,11 @@ public class Player extends Entity {
 
         switch (hitType) {
             case PUNCH:
+                facingRight = fromRight;
                 if (!isBlocking()) {
                     setHealth(getHealth() - 7);
-                    stunTime = 50;
+                    hit = true;
                 } else {
-                    stunTime = 20;
                     setHealth(getHealth() - 2);
                 }
         }
@@ -295,10 +290,6 @@ public class Player extends Entity {
         healthBar.setHealth(this.getHealth());
     }
 
-    public double getStunTime() {
-        return stunTime;
-    }
-
     public PlayerHit getHittingType() {
         return hittingType;
     }
@@ -311,11 +302,27 @@ public class Player extends Entity {
         return facingRight;
     }
 
+    public void setFacingRight(boolean facingRight) {
+        this.facingRight = facingRight;
+    }
+
     public boolean isPunchHit() {
         return punchHit;
     }
 
+    public void setPunchHit(boolean punchHit) {
+        this.punchHit = punchHit;
+    }
+
     public void resetHits() {
         punchHit = false;
+    }
+
+    public boolean isHit() {
+        return hit;
+    }
+
+    public boolean isHitting() {
+        return hitting;
     }
 }

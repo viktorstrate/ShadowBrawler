@@ -26,8 +26,8 @@ public class PlayerHealth extends Entity {
     public PlayerHealth(Player player) {
         super((int) player.getX() + OFFSET_X, (int) player.getY() + OFFSET_Y, 30, 5);
         this.player = player;
-        health = 70;
-        show = true;
+        health = player.getHealth();
+        show = false;
         showAmount = 0f;
     }
 
